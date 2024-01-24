@@ -22,6 +22,12 @@ ui <- dashboardPage(
     tabItems(
       tabItem(tabName = "about",
         
+      ),
+      
+      tabItem(tabName = "data",
+          selectInput(inputId = "state", "Select a location",
+                      choices = eyeHealth$LocationDesc)    
+              
       )
     ),
     
