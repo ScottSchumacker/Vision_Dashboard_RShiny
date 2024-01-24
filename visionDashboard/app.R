@@ -24,10 +24,13 @@ ui <- dashboardPage(
         
       ),
       
+      # Location drop down
       tabItem(tabName = "data",
-          selectInput(inputId = "state", "Select a location",
-                      choices = eyeHealth$LocationDesc)    
-              
+          selectInput(inputId = "location", "Select a location",
+                      choices = eyeHealth$LocationDesc),
+          
+          # Time Series Plot
+          plotOutput("timePlot"),
       )
     ),
     
@@ -35,6 +38,22 @@ ui <- dashboardPage(
 )
 
 server <- function(input, output) {
+  
+  # Data Subset
+  DF <- reactive({
+    eyeHealth %>% filter(LocationDesc == input$location, Age == "All ages",
+                         Gender == "All genders", 
+                         RaceEthnicity == "All races",
+                         RiskFactor == "All participants",
+                         Data_Value_Type == "Crude Prevalence")
+  })
+  
+  # Time series plot
+  output$timePlot <- renderPlot({
+    ggplot(DF(), aes(x = YearStart, y = Data_Value)) +
+      geom_line() +
+      geom_point(size = 4) + xlab("Crude Prevalence") + ylab("Year")
+  })
 
 }
 
