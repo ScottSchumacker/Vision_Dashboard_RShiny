@@ -30,7 +30,7 @@ ui <- dashboardPage(
                       choices = eyeHealth$LocationDesc),
           
           # Time Series Plot
-          plotOutput("timePlot"),
+          plotlyOutput("timePlot"),
       )
     ),
     
@@ -49,10 +49,11 @@ server <- function(input, output) {
   })
   
   # Time series plot
-  output$timePlot <- renderPlot({
-    ggplot(DF(), aes(x = YearStart, y = Data_Value)) +
+  output$timePlot <- renderPlotly({
+    p <- ggplot(DF(), aes(x = YearStart, y = Data_Value)) +
       geom_line() +
-      geom_point(size = 4) + xlab("Crude Prevalence") + ylab("Year")
+      geom_point(size = 4) + xlab("Year") + ylab("Crude Prevalence")
+    ggplotly(p)
   })
 
 }
