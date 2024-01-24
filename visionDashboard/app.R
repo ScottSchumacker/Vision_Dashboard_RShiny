@@ -27,7 +27,8 @@ ui <- dashboardPage(
       # Location drop down
       tabItem(tabName = "data",
           selectInput(inputId = "location", "Select a location",
-                      choices = eyeHealth$LocationDesc),
+                      choices = unique(eyeHealth$LocationDesc),
+                      selected = "National"),
           
           # Time Series Plot
           plotlyOutput("timePlot"),
