@@ -13,7 +13,7 @@ ui <- dashboardPage(
   dashboardSidebar(
     sidebarMenu(
       menuItem("About", tabName = "about"),
-      menuItem("Vision Data", tabName = "data")
+      menuItem("Vision & Eye Health Data", tabName = "data")
     )
   ),
   
@@ -21,7 +21,14 @@ ui <- dashboardPage(
     
     tabItems(
       tabItem(tabName = "about",
-        
+        h1("About"),
+        br(),
+        p("This dashboard was created with data from the Centers for Disease 
+        Control and Prevention Data Catalogue."),
+        p("Data set: Behavioral Risk Factors - Vision and Eye Health
+          Surveillance."),
+        p("Data link: https://data.cdc.gov/Vision-Eye-Health/Behavioral-Risk-Factors-Vision-and-Eye-Health-Surv/vkwg-yswv/about_data"),
+        p("Dashboard Creator and Maintainer: Scott Schumacker")
       ),
       
       # Location drop down
