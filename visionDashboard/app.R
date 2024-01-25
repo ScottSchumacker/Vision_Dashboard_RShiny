@@ -9,7 +9,7 @@ library(ggplot2)
 library(plotly)
 
 ui <- dashboardPage(
-  dashboardHeader(title = "Vision Dashboard"),
+  dashboardHeader(title = "Vision & Eye Health"),
   dashboardSidebar(
     sidebarMenu(
       menuItem("About", tabName = "about"),
@@ -36,6 +36,9 @@ ui <- dashboardPage(
           selectInput(inputId = "location", "Select a location",
                       choices = unique(eyeHealth$LocationDesc),
                       selected = "National"),
+          selectInput(inputId = "gender", "Select a gender",
+                      choices = unique(eyeHealth$Gender),
+                      selected = "All genders"),
           
           # Time Series Plot
           plotlyOutput("timePlot"),
@@ -50,7 +53,7 @@ server <- function(input, output) {
   # Data Subset
   DF <- reactive({
     eyeHealth %>% filter(LocationDesc == input$location, Age == "All ages",
-                         Gender == "All genders", 
+                         Gender == input$gender, 
                          RaceEthnicity == "All races",
                          RiskFactor == "All participants",
                          Data_Value_Type == "Crude Prevalence")
