@@ -9,11 +9,11 @@ library(ggplot2)
 library(plotly)
 
 ui <- dashboardPage(
-  dashboardHeader(title = "Vision Dashboard"),
+  dashboardHeader(title = "Vision & Eye Health"),
   dashboardSidebar(
     sidebarMenu(
       menuItem("About", tabName = "about"),
-      menuItem("Vision Data", tabName = "data")
+      menuItem("Vision & Eye Health Data", tabName = "data")
     )
   ),
   
@@ -21,7 +21,14 @@ ui <- dashboardPage(
     
     tabItems(
       tabItem(tabName = "about",
-        
+        h1("About"),
+        br(),
+        p("This dashboard was created with data from the Centers for Disease 
+        Control and Prevention Data Catalogue."),
+        p("Data set: Behavioral Risk Factors - Vision and Eye Health
+          Surveillance."),
+        p("Data link: https://data.cdc.gov/Vision-Eye-Health/Behavioral-Risk-Factors-Vision-and-Eye-Health-Surv/vkwg-yswv/about_data"),
+        p("Dashboard Creator and Maintainer: Scott Schumacker")
       ),
       
       # Location drop down
@@ -29,6 +36,9 @@ ui <- dashboardPage(
           selectInput(inputId = "location", "Select a location",
                       choices = unique(eyeHealth$LocationDesc),
                       selected = "National"),
+          selectInput(inputId = "gender", "Select a gender",
+                      choices = unique(eyeHealth$Gender),
+                      selected = "All genders"),
           
           # Time Series Plot
           plotlyOutput("timePlot"),
@@ -43,7 +53,7 @@ server <- function(input, output) {
   # Data Subset
   DF <- reactive({
     eyeHealth %>% filter(LocationDesc == input$location, Age == "All ages",
-                         Gender == "All genders", 
+                         Gender == input$gender, 
                          RaceEthnicity == "All races",
                          RiskFactor == "All participants",
                          Data_Value_Type == "Crude Prevalence")
