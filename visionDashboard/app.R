@@ -36,6 +36,11 @@ ui <- dashboardPage(
       tabItem(tabName = "data",
               
               fluidRow(
+                valueBoxOutput("avgValueOut", width = 4),
+                valueBoxOutput("avgValueOut2", width = 4)
+              ),
+              
+              fluidRow(
                 box(
                   title = "Plot Inputs", status = "primary", solidHeader = TRUE,
                   collapsible = TRUE,
@@ -58,7 +63,7 @@ ui <- dashboardPage(
                   column(6,
                          selectInput(inputId = "location2", "Select a location",
                                      choices = unique(eyeHealth$LocationDesc),
-                                     selected = "National"),
+                                     selected = "New Jersey"),
                          selectInput(inputId = "gender2", "Select a gender",
                                      choices = unique(eyeHealth$Gender),
                                      selected = "All genders"),
@@ -89,10 +94,22 @@ server <- function(input, output) {
            RaceEthnicity == "All races", RiskFactor == "All participants",
            RiskFactorResponse == "All participants", LocationDesc == "National")
   
-  avgPrevValue <- mean(avgDF$Data_Value)
-  avgSampleSize <- mean(avgDF$Sample_Size)
+  avgPrevValue <- round(mean(avgDF$Data_Value), 2)
+  avgSampleSize <- round(mean(avgDF$Sample_Size),0)
   
-  renderText("5")
+  output$avgValueOut <- renderValueBox({
+    valueBox(
+      paste0(avgPrevValue, "%"), "Average Disability Prevalence", icon = icon("list"),
+      color = "blue"
+    )
+  })
+  
+  output$avgValueOut2 <- renderValueBox({
+    valueBox(
+      avgSampleSize, "Average Sample Size", icon = icon("list"),
+      color = "blue"
+    )
+  })
   
   # Data Subset
   DF <- reactive({
