@@ -36,44 +36,44 @@ ui <- dashboardPage(
       tabItem(tabName = "data",
               
               fluidRow(
+                box(
+                  title = "Plot Inputs", status = "primary", solidHeader = TRUE,
+                  collapsible = TRUE,
+                  column(6,
+                         selectInput(inputId = "location", "Select a location",
+                                     choices = unique(eyeHealth$LocationDesc),
+                                     selected = "National"),
+                         selectInput(inputId = "gender", "Select a gender",
+                                     choices = unique(eyeHealth$Gender),
+                                     selected = "All genders"),
+                         selectInput(inputId = "age", "Select an age group",
+                                     choices = unique(eyeHealth$Age),
+                                     selected = "All ages"),
+                         selectInput(inputId = "ethnicity", "Select an ethnicity",
+                                     choices = unique(eyeHealth$RaceEthnicity),
+                                     selected = "All races"),
+                         h4("Black")
+                  ),
+                  
+                  column(6,
+                         selectInput(inputId = "location2", "Select a location",
+                                     choices = unique(eyeHealth$LocationDesc),
+                                     selected = "National"),
+                         selectInput(inputId = "gender2", "Select a gender",
+                                     choices = unique(eyeHealth$Gender),
+                                     selected = "All genders"),
+                         selectInput(inputId = "age2", "Select an age group",
+                                     choices = unique(eyeHealth$Age),
+                                     selected = "All ages"),
+                         selectInput(inputId = "ethnicity2", "Select an ethnicity",
+                                     choices = unique(eyeHealth$RaceEthnicity),
+                                     selected = "All races"),
+                         h4("Red")
+                  )
+                ),
                 
-                column(4,
-                       h4("Line 1"),
-                       selectInput(inputId = "location", "Select a location",
-                                   choices = unique(eyeHealth$LocationDesc),
-                                   selected = "National"),
-                       selectInput(inputId = "gender", "Select a gender",
-                                   choices = unique(eyeHealth$Gender),
-                                   selected = "All genders"),
-                       selectInput(inputId = "age", "Select an age group",
-                                   choices = unique(eyeHealth$Age),
-                                   selected = "All ages"),
-                       selectInput(inputId = "ethnicity", "Select an ethnicity",
-                                   choices = unique(eyeHealth$RaceEthnicity),
-                                   selected = "All races"), 
-                       ),
-                
-                column(4,
-                       h4('Line 2'),
-                       selectInput(inputId = "location2", "Select a location",
-                                   choices = unique(eyeHealth$LocationDesc),
-                                   selected = "National"),
-                       selectInput(inputId = "gender2", "Select a gender",
-                                   choices = unique(eyeHealth$Gender),
-                                   selected = "All genders"),
-                       selectInput(inputId = "age2", "Select an age group",
-                                   choices = unique(eyeHealth$Age),
-                                   selected = "All ages"),
-                       selectInput(inputId = "ethnicity2", "Select an ethnicity",
-                                   choices = unique(eyeHealth$RaceEthnicity),
-                                   selected = "All races"), 
-                       )
-                
-              ),
-              
-              fluidRow(
                 # Time Series Plot
-                plotlyOutput("timePlot") 
+                column(6,plotlyOutput("timePlot"))
               )
       )
     ),
@@ -82,6 +82,17 @@ ui <- dashboardPage(
 )
 
 server <- function(input, output) {
+  
+  # Calculating mean prevalence
+  avgDF <- eyeHealth %>% 
+    filter(Age == "All ages", Gender == "All genders", 
+           RaceEthnicity == "All races", RiskFactor == "All participants",
+           RiskFactorResponse == "All participants", LocationDesc == "National")
+  
+  avgPrevValue <- mean(avgDF$Data_Value)
+  avgSampleSize <- mean(avgDF$Sample_Size)
+  
+  renderText("5")
   
   # Data Subset
   DF <- reactive({
