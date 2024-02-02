@@ -10,11 +10,11 @@ library(plotly)
 library(renv)
 
 ui <- dashboardPage(
-  dashboardHeader(title = "Vision & Eye Health"),
+  dashboardHeader(title = tags$u("Vision & Eye Health")),
   dashboardSidebar(
     sidebarMenu(
-      menuItem("About", tabName = "about"),
-      menuItem("Vision & Eye Health Data", tabName = "data")
+      menuItem("Data Explore", tabName = "data"),
+      menuItem("About", tabName = "about")
     )
   ),
   
@@ -27,14 +27,14 @@ ui <- dashboardPage(
     
     tabItems(
       tabItem(tabName = "about",
-        h1("About"),
-        br(),
-        p("This dashboard was created with data from the Centers for Disease 
-        Control and Prevention Data Catalogue."),
-        p("Data set: Behavioral Risk Factors - Vision and Eye Health
+        tags$div(id = "aboutText",
+          h1(tags$u("About")),
+          br(),
+          p(icon("database"), "Data set: Behavioral Risk Factors - Vision and Eye Health
           Surveillance."),
-        p("Data link: https://data.cdc.gov/Vision-Eye-Health/Behavioral-Risk-Factors-Vision-and-Eye-Health-Surv/vkwg-yswv/about_data"),
-        p("Dashboard Creator and Maintainer: Scott Schumacker")
+          p(icon("database"), "Data link:", tags$a("CDC Data",href = "https://data.cdc.gov/Vision-Eye-Health/Behavioral-Risk-Factors-Vision-and-Eye-Health-Surv/vkwg-yswv/about_data")),
+          p(icon("user"), "Dashboard Creator and Maintainer: Scott Schumacker") 
+        )
       ),
       
       # Location drop down
@@ -136,8 +136,8 @@ server <- function(input, output) {
   output$avgValueOut <- renderValueBox({
     valueBox(
       paste0(avgPrevValue, "%"), 
-      "National Mean Vision Disability Prevalence", 
-      icon = icon("list"), color = "blue"
+      "Mean National Vision Disability Prevalence", 
+      icon = icon("eye"), color = "blue"
     )
   })
   
@@ -146,7 +146,7 @@ server <- function(input, output) {
     valueBox(
       state1, 
       "State / Territory with the Highest Mean Prevalence of Vision Loss", 
-      icon = icon("list"), color = "blue"
+      icon = icon("plane"), color = "blue"
     )
   })
   
