@@ -19,7 +19,6 @@ ui <- dashboardPage(
   ),
   
   dashboardBody(
-    
     tabItems(
       tabItem(tabName = "about",
         h1("About"),
@@ -35,10 +34,12 @@ ui <- dashboardPage(
       # Location drop down
       tabItem(tabName = "data",
               
+              # Row for main metric
               fluidRow(
                 valueBoxOutput("avgValueOut", width = 6),
               ),
               
+              # Row for time series plot and inputs
               fluidRow(
                 box(
                   title = "Plot Inputs", status = "primary", solidHeader = TRUE,
@@ -53,10 +54,13 @@ ui <- dashboardPage(
                          selectInput(inputId = "age", "Select an age group",
                                      choices = unique(eyeHealth$Age),
                                      selected = "All ages"),
-                         selectInput(inputId = "ethnicity", "Select an ethnicity",
+                         selectInput(inputId = "ethnicity", 
+                                     "Select an ethnicity",
                                      choices = unique(eyeHealth$RaceEthnicity),
                                      selected = "All races"),
-                         h4("Black")
+                         selectInput(inputId = "color", "Select a color",
+                                     choices = c("Black"),
+                                     selected = "All races")
                   ),
                   
                   column(6,
@@ -69,10 +73,13 @@ ui <- dashboardPage(
                          selectInput(inputId = "age2", "Select an age group",
                                      choices = unique(eyeHealth$Age),
                                      selected = "All ages"),
-                         selectInput(inputId = "ethnicity2", "Select an ethnicity",
+                         selectInput(inputId = "ethnicity2", 
+                                     "Select an ethnicity",
                                      choices = unique(eyeHealth$RaceEthnicity),
                                      selected = "All races"),
-                         h4("Red")
+                         selectInput(inputId = "color2", "Select a color",
+                                     choices = c("Red"),
+                                     selected = "All races"),
                   )
                 ),
                 
@@ -80,7 +87,7 @@ ui <- dashboardPage(
                 column(6,plotlyOutput("timePlot"))
               ),
               
-              # Row for Bar plot
+              # Row for risk bar plot and age bar plot
               fluidRow(
                 column(6, plotlyOutput("riskPlot")),
                 column(6, plotlyOutput("agePlot"))
@@ -90,29 +97,28 @@ ui <- dashboardPage(
               fluidRow(12, plotlyOutput("locationPlot"))
       )
     ),
-    
   )
 )
 
 server <- function(input, output) {
   
-  # Calculating mean prevalence
+  # Creating Main Metric DF to Calculate Overall Mean Prevalence
   avgDF <- eyeHealth %>% 
     filter(Age == "All ages", Gender == "All genders", 
            RaceEthnicity == "All races", RiskFactor == "All participants",
            RiskFactorResponse == "All participants", LocationDesc == "National")
   
   avgPrevValue <- round(mean(avgDF$Data_Value), 2)
-  avgSampleSize <- round(mean(avgDF$Sample_Size),0)
   
+  # Output for Main Metric
   output$avgValueOut <- renderValueBox({
     valueBox(
-      paste0(avgPrevValue, "%"), "Mean Vision Disability Prevalence", icon = icon("list"),
-      color = "blue"
+      paste0(avgPrevValue, "%"), 
+      "Mean Vision Disability Prevalence", icon = icon("list"), color = "blue"
     )
   })
   
-  # Data Subset
+  # Creating Reactive Time Series Data Frames
   DF <- reactive({
     eyeHealth %>% filter(LocationDesc == input$location, Age == input$age,
                          Gender == input$gender, 
@@ -129,24 +135,29 @@ server <- function(input, output) {
                          Data_Value_Type == "Crude Prevalence")
   })
   
-  # Time series plot
+  # Reactive Output for Time Series Plot
   output$timePlot <- renderPlotly({
     p <- ggplot(DF(), aes(x = YearStart, y = Data_Value)) +
       geom_line(color = "black") +
-      geom_point(size = 4, color = "black") + xlab("Year") + ylab("Prevalence (%)") +
-      geom_line(data = DF2(), aes(x = YearStart, y = Data_Value), color = "red") +
-      geom_point(data = DF2(), aes(x = YearStart, y = Data_Value), color = "red", size = 4) +
+      geom_point(size = 4, color = "black") + 
+      xlab("Year") + ylab("Prevalence (%)") +
+      geom_line(data = DF2(), aes(x = YearStart, y = Data_Value), 
+                color = "red") +
+      geom_point(data = DF2(), aes(x = YearStart, y = Data_Value), 
+                 color = "red", size = 4) +
       ggtitle("Prevalence of Severe Vision Disability Over Time")
     ggplotly(p)
   })
   
+  # Creating Risk Factor Data Frame
   riskFactorDF <- eyeHealth %>% 
     filter(Age == "All ages", Gender == "All genders", 
            RaceEthnicity == "All races", Data_Value_Type == "Crude Prevalence",
            RiskFactorResponse == "Yes", LocationDesc == "National") %>% 
     group_by(RiskFactor) %>% 
-    summarise(mean_prevalence = mean(Data_Value))
+    summarise(mean_prevalence = round(mean(Data_Value), 2))
   
+  # Output for Risk Factor Bar Plot
   output$riskPlot <- renderPlotly({
     p2 <- ggplot(riskFactorDF, aes(x = RiskFactor, y = mean_prevalence)) +
       geom_bar(stat = "identity") + xlab("Risk Factor") +
@@ -154,23 +165,27 @@ server <- function(input, output) {
     ggplotly(p2)
   })
   
+  # Creating Age Data Frame
   ageDF <- eyeHealth %>% 
     filter(Gender == "All genders", 
            RaceEthnicity == "All races", Data_Value_Type == "Crude Prevalence",
-           RiskFactorResponse == "All participants", RiskFactor == "All participants",
+           RiskFactorResponse == "All participants", 
+           RiskFactor == "All participants",
            LocationDesc == "National") %>% 
     filter(Age != "All ages") %>% 
     group_by(Age) %>% 
-    summarise(mean_prevalence = mean(Data_Value))
+    summarise(mean_prevalence = round(mean(Data_Value), 2))
   
+  # Output for Age Bar Plot
   output$agePlot <- renderPlotly({
     p3 <- ggplot(ageDF, aes(x = Age, y = mean_prevalence)) +
-      geom_bar(stat = "identity") + xlab("Age Group") + ylab("Mean Prevalence (%)") +
+      geom_bar(stat = "identity") + xlab("Age Group") + 
+      ylab("Mean Prevalence (%)") +
       ggtitle("Age Group Comparison")
     ggplotly(p3)
   })
   
-  # Location Bar Plot
+  # Creating Location Data Frame
   locationDF <- eyeHealth %>% 
     filter(Gender == "All genders", 
            RaceEthnicity == "All races", Age == "All ages", 
@@ -179,13 +194,15 @@ server <- function(input, output) {
            RiskFactor == "All participants") %>% 
     filter(LocationDesc != "National") %>% 
     group_by(LocationDesc) %>% 
-    summarise(mean_prevalence = mean(Data_Value)) %>% 
+    summarise(mean_prevalence = round(mean(Data_Value), 2)) %>% 
     arrange(desc(mean_prevalence)) %>% 
     head(10)
   
+  # Output for Location Bar Plot
   output$locationPlot <- renderPlotly({
     p4 <- ggplot(locationDF, aes(x = LocationDesc, y = mean_prevalence)) +
-      geom_bar(stat = "identity") + xlab("State") + ylab("Mean Prevalence (%)") +
+      geom_bar(stat = "identity") + xlab("State") + 
+      ylab("Mean Prevalence (%)") +
       ggtitle("States With the Highest Mean Prevalence of Vision Disability")
     ggplotly(p4)
   })
