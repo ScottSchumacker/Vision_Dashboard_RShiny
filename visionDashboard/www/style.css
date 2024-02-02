@@ -1,0 +1,42 @@
+/* Scott Schumacker */
+
+.skin-blue .wrapper .content-wrapper, .right-side {
+  background-color: white;
+}
+
+.skin-blue .main-header .navbar {
+  background-color: white;
+}
+
+.skin-blue .main-header .logo {
+  background-color: #0077B6;
+  color: white;
+}
+
+.skin-blue .main-header .logo:hover {
+  background-color: #0077B6;
+  color: white;
+}
+
+.skin-blue .main-header .navbar .sidebar-toggle {
+  background-color: white;
+  color: black;
+}
+
+.skin-blue .main-header .navbar .sidebar-toggle:hover {
+  background-color: white;
+  color: black;
+}
+
+.skin-blue .main-sidebar {
+  background-color: #0077B6;
+}
+
+.skin-blue .sidebar-menu>li {
+  color: black;
+}
+
+.skin-blue .sidebar-menu>li.active>a{
+  background-color: white;
+  color: #403D39;
+}
