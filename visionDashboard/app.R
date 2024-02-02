@@ -13,7 +13,7 @@ ui <- dashboardPage(
   dashboardHeader(title = "Vision & Eye Health"),
   dashboardSidebar(
     sidebarMenu(
-      menuItem("About", tabName = "about"),
+      #menuItem("About", tabName = "about"),
       menuItem("Vision & Eye Health Data", tabName = "data")
     )
   ),
@@ -36,14 +36,13 @@ ui <- dashboardPage(
       tabItem(tabName = "data",
               
               fluidRow(
-                valueBoxOutput("avgValueOut", width = 4),
-                valueBoxOutput("avgValueOut2", width = 4)
+                valueBoxOutput("avgValueOut", width = 6),
               ),
               
               fluidRow(
                 box(
                   title = "Plot Inputs", status = "primary", solidHeader = TRUE,
-                  collapsible = TRUE,
+                  collapsible = FALSE,
                   column(6,
                          selectInput(inputId = "location", "Select a location",
                                      choices = unique(eyeHealth$LocationDesc),
@@ -85,7 +84,10 @@ ui <- dashboardPage(
               fluidRow(
                 column(6, plotlyOutput("riskPlot")),
                 column(6, plotlyOutput("agePlot"))
-              )
+              ),
+              
+              # Row for Location Bar Plot
+              fluidRow(12, plotlyOutput("locationPlot"))
       )
     ),
     
@@ -105,14 +107,7 @@ server <- function(input, output) {
   
   output$avgValueOut <- renderValueBox({
     valueBox(
-      paste0(avgPrevValue, "%"), "Average Disability Prevalence", icon = icon("list"),
-      color = "blue"
-    )
-  })
-  
-  output$avgValueOut2 <- renderValueBox({
-    valueBox(
-      avgSampleSize, "Average Sample Size", icon = icon("list"),
+      paste0(avgPrevValue, "%"), "Mean Vision Disability Prevalence", icon = icon("list"),
       color = "blue"
     )
   })
@@ -141,7 +136,7 @@ server <- function(input, output) {
       geom_point(size = 4, color = "black") + xlab("Year") + ylab("Prevalence (%)") +
       geom_line(data = DF2(), aes(x = YearStart, y = Data_Value), color = "red") +
       geom_point(data = DF2(), aes(x = YearStart, y = Data_Value), color = "red", size = 4) +
-      ggtitle("Prevalence of Severe Vision Disability")
+      ggtitle("Prevalence of Severe Vision Disability Over Time")
     ggplotly(p)
   })
   
@@ -155,7 +150,7 @@ server <- function(input, output) {
   output$riskPlot <- renderPlotly({
     p2 <- ggplot(riskFactorDF, aes(x = RiskFactor, y = mean_prevalence)) +
       geom_bar(stat = "identity") + xlab("Risk Factor") +
-      ylab("Mean Prevalence (%)")
+      ylab("Mean Prevalence (%)") + ggtitle("Risk Factor Comparison")
     ggplotly(p2)
   })
   
@@ -170,8 +165,29 @@ server <- function(input, output) {
   
   output$agePlot <- renderPlotly({
     p3 <- ggplot(ageDF, aes(x = Age, y = mean_prevalence)) +
-      geom_bar(stat = "identity")
+      geom_bar(stat = "identity") + xlab("Age Group") + ylab("Mean Prevalence (%)") +
+      ggtitle("Age Group Comparison")
     ggplotly(p3)
+  })
+  
+  # Location Bar Plot
+  locationDF <- eyeHealth %>% 
+    filter(Gender == "All genders", 
+           RaceEthnicity == "All races", Age == "All ages", 
+           Data_Value_Type == "Crude Prevalence",
+           RiskFactorResponse == "All participants", 
+           RiskFactor == "All participants") %>% 
+    filter(LocationDesc != "National") %>% 
+    group_by(LocationDesc) %>% 
+    summarise(mean_prevalence = mean(Data_Value)) %>% 
+    arrange(desc(mean_prevalence)) %>% 
+    head(10)
+  
+  output$locationPlot <- renderPlotly({
+    p4 <- ggplot(locationDF, aes(x = LocationDesc, y = mean_prevalence)) +
+      geom_bar(stat = "identity") + xlab("State") + ylab("Mean Prevalence (%)") +
+      ggtitle("States With the Highest Mean Prevalence of Vision Disability")
+    ggplotly(p4)
   })
 
 }
