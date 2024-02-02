@@ -13,12 +13,18 @@ ui <- dashboardPage(
   dashboardHeader(title = "Vision & Eye Health"),
   dashboardSidebar(
     sidebarMenu(
-      #menuItem("About", tabName = "about"),
+      menuItem("About", tabName = "about"),
       menuItem("Vision & Eye Health Data", tabName = "data")
     )
   ),
   
   dashboardBody(
+    
+    # Linking CSS
+    tags$head(
+      tags$link(rel = "stylesheet", type = "text/css", href = "style.css")
+    ),
+    
     tabItems(
       tabItem(tabName = "about",
         h1("About"),
@@ -37,6 +43,7 @@ ui <- dashboardPage(
               # Row for main metric
               fluidRow(
                 valueBoxOutput("avgValueOut", width = 6),
+                valueBoxOutput("avgValueOut2", width = 6)
               ),
               
               # Row for time series plot and inputs
@@ -78,7 +85,7 @@ ui <- dashboardPage(
                                      choices = unique(eyeHealth$RaceEthnicity),
                                      selected = "All races"),
                          selectInput(inputId = "color2", "Select a color",
-                                     choices = c("Red"),
+                                     choices = c("Blue"),
                                      selected = "All races"),
                   )
                 ),
@@ -110,11 +117,36 @@ server <- function(input, output) {
   
   avgPrevValue <- round(mean(avgDF$Data_Value), 2)
   
+  # Creating Location Data Frame
+  locationDF <- eyeHealth %>% 
+    filter(Gender == "All genders", 
+           RaceEthnicity == "All races", Age == "All ages", 
+           Data_Value_Type == "Crude Prevalence",
+           RiskFactorResponse == "All participants", 
+           RiskFactor == "All participants") %>% 
+    filter(LocationDesc != "National") %>% 
+    group_by(LocationDesc) %>% 
+    summarise(mean_prevalence = round(mean(Data_Value), 2)) %>% 
+    arrange(desc(mean_prevalence)) %>% 
+    head(10)
+  
+  state1 <- locationDF[1,1]
+  
   # Output for Main Metric
   output$avgValueOut <- renderValueBox({
     valueBox(
       paste0(avgPrevValue, "%"), 
-      "Mean Vision Disability Prevalence", icon = icon("list"), color = "blue"
+      "National Mean Vision Disability Prevalence", 
+      icon = icon("list"), color = "blue"
+    )
+  })
+  
+  # Output for Main Metric
+  output$avgValueOut2 <- renderValueBox({
+    valueBox(
+      state1, 
+      "State / Territory with the Highest Mean Prevalence of Vision Loss", 
+      icon = icon("list"), color = "blue"
     )
   })
   
@@ -142,9 +174,9 @@ server <- function(input, output) {
       geom_point(size = 4, color = "black") + 
       xlab("Year") + ylab("Prevalence (%)") +
       geom_line(data = DF2(), aes(x = YearStart, y = Data_Value), 
-                color = "red") +
+                color = "#00B4D8") +
       geom_point(data = DF2(), aes(x = YearStart, y = Data_Value), 
-                 color = "red", size = 4) +
+                 color = "#00B4D8", size = 4) +
       ggtitle("Prevalence of Severe Vision Disability Over Time")
     ggplotly(p)
   })
@@ -160,7 +192,8 @@ server <- function(input, output) {
   # Output for Risk Factor Bar Plot
   output$riskPlot <- renderPlotly({
     p2 <- ggplot(riskFactorDF, aes(x = RiskFactor, y = mean_prevalence)) +
-      geom_bar(stat = "identity") + xlab("Risk Factor") +
+      geom_bar(stat = "identity", fill = "#0077B6",color = "black", 
+               alpha = 0.9) + xlab("Risk Factor") +
       ylab("Mean Prevalence (%)") + ggtitle("Risk Factor Comparison")
     ggplotly(p2)
   })
@@ -179,29 +212,18 @@ server <- function(input, output) {
   # Output for Age Bar Plot
   output$agePlot <- renderPlotly({
     p3 <- ggplot(ageDF, aes(x = Age, y = mean_prevalence)) +
-      geom_bar(stat = "identity") + xlab("Age Group") + 
+      geom_bar(stat = "identity", fill = "#0077B6", color = "black", 
+               alpha = 0.9) + xlab("Age Group") + 
       ylab("Mean Prevalence (%)") +
       ggtitle("Age Group Comparison")
     ggplotly(p3)
   })
   
-  # Creating Location Data Frame
-  locationDF <- eyeHealth %>% 
-    filter(Gender == "All genders", 
-           RaceEthnicity == "All races", Age == "All ages", 
-           Data_Value_Type == "Crude Prevalence",
-           RiskFactorResponse == "All participants", 
-           RiskFactor == "All participants") %>% 
-    filter(LocationDesc != "National") %>% 
-    group_by(LocationDesc) %>% 
-    summarise(mean_prevalence = round(mean(Data_Value), 2)) %>% 
-    arrange(desc(mean_prevalence)) %>% 
-    head(10)
-  
   # Output for Location Bar Plot
   output$locationPlot <- renderPlotly({
     p4 <- ggplot(locationDF, aes(x = LocationDesc, y = mean_prevalence)) +
-      geom_bar(stat = "identity") + xlab("State") + 
+      geom_bar(stat = "identity", fill = "#0077B6", 
+               color = "black", alpha = 0.9) + xlab("State") + 
       ylab("Mean Prevalence (%)") +
       ggtitle("States With the Highest Mean Prevalence of Vision Disability")
     ggplotly(p4)
