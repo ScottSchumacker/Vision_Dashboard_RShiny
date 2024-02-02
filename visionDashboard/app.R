@@ -83,7 +83,8 @@ ui <- dashboardPage(
               
               # Row for Bar plot
               fluidRow(
-                column(6, plotOutput("barPlot"))
+                column(6, plotlyOutput("riskPlot")),
+                column(6, plotlyOutput("agePlot"))
               )
       )
     ),
@@ -137,7 +138,7 @@ server <- function(input, output) {
   output$timePlot <- renderPlotly({
     p <- ggplot(DF(), aes(x = YearStart, y = Data_Value)) +
       geom_line(color = "black") +
-      geom_point(size = 4, color = "black") + xlab("Year") + ylab("Crude Prevalence (%)") +
+      geom_point(size = 4, color = "black") + xlab("Year") + ylab("Prevalence (%)") +
       geom_line(data = DF2(), aes(x = YearStart, y = Data_Value), color = "red") +
       geom_point(data = DF2(), aes(x = YearStart, y = Data_Value), color = "red", size = 4) +
       ggtitle("Prevalence of Severe Vision Disability")
@@ -151,10 +152,26 @@ server <- function(input, output) {
     group_by(RiskFactor) %>% 
     summarise(mean_prevalence = mean(Data_Value))
   
-  output$barPlot <- renderPlot({
+  output$riskPlot <- renderPlotly({
     p2 <- ggplot(riskFactorDF, aes(x = RiskFactor, y = mean_prevalence)) +
+      geom_bar(stat = "identity") + xlab("Risk Factor") +
+      ylab("Mean Prevalence (%)")
+    ggplotly(p2)
+  })
+  
+  ageDF <- eyeHealth %>% 
+    filter(Gender == "All genders", 
+           RaceEthnicity == "All races", Data_Value_Type == "Crude Prevalence",
+           RiskFactorResponse == "All participants", RiskFactor == "All participants",
+           LocationDesc == "National") %>% 
+    filter(Age != "All ages") %>% 
+    group_by(Age) %>% 
+    summarise(mean_prevalence = mean(Data_Value))
+  
+  output$agePlot <- renderPlotly({
+    p3 <- ggplot(ageDF, aes(x = Age, y = mean_prevalence)) +
       geom_bar(stat = "identity")
-    p2
+    ggplotly(p3)
   })
 
 }
