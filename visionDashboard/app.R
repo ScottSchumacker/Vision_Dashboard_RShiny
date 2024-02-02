@@ -79,6 +79,11 @@ ui <- dashboardPage(
                 
                 # Time Series Plot
                 column(6,plotlyOutput("timePlot"))
+              ),
+              
+              # Row for Bar plot
+              fluidRow(
+                column(6, plotOutput("barPlot"))
               )
       )
     ),
@@ -137,6 +142,19 @@ server <- function(input, output) {
       geom_point(data = DF2(), aes(x = YearStart, y = Data_Value), color = "red", size = 4) +
       ggtitle("Prevalence of Severe Vision Disability")
     ggplotly(p)
+  })
+  
+  riskFactorDF <- eyeHealth %>% 
+    filter(Age == "All ages", Gender == "All genders", 
+           RaceEthnicity == "All races", Data_Value_Type == "Crude Prevalence",
+           RiskFactorResponse == "Yes", LocationDesc == "National") %>% 
+    group_by(RiskFactor) %>% 
+    summarise(mean_prevalence = mean(Data_Value))
+  
+  output$barPlot <- renderPlot({
+    p2 <- ggplot(riskFactorDF, aes(x = RiskFactor, y = mean_prevalence)) +
+      geom_bar(stat = "identity")
+    p2
   })
 
 }
