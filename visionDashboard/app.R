@@ -30,9 +30,7 @@ ui <- dashboardPage(
         tags$div(id = "aboutText",
           h1(tags$u("About")),
           br(),
-          p(icon("database"), "Data set: Behavioral Risk Factors - Vision and Eye Health
-          Surveillance."),
-          p(icon("database"), "Data link:", tags$a("CDC Data",href = "https://data.cdc.gov/Vision-Eye-Health/Behavioral-Risk-Factors-Vision-and-Eye-Health-Surv/vkwg-yswv/about_data")),
+          p(icon("database"), "Data Set: ",tags$a("Behavioral Risk Factors - Vision and Eye Health Surveillance (CDC)",href = "https://data.cdc.gov/Vision-Eye-Health/Behavioral-Risk-Factors-Vision-and-Eye-Health-Surv/vkwg-yswv/about_data")),
           p(icon("user"), "Dashboard Creator and Maintainer: Scott Schumacker") 
         )
       ),
@@ -104,6 +102,11 @@ ui <- dashboardPage(
               fluidRow(12, plotlyOutput("locationPlot"))
       )
     ),
+    br(),
+    br(),
+    div(id = "versionNumber",
+        "v1.0.0" 
+    )
   )
 )
 
@@ -191,7 +194,7 @@ server <- function(input, output) {
   
   # Output for Risk Factor Bar Plot
   output$riskPlot <- renderPlotly({
-    p2 <- ggplot(riskFactorDF, aes(x = RiskFactor, y = mean_prevalence)) +
+    p2 <- ggplot(riskFactorDF, aes(x = reorder(RiskFactor, +mean_prevalence), y = mean_prevalence)) +
       geom_bar(stat = "identity", fill = "#0077B6",color = "black", 
                alpha = 0.9) + xlab("Risk Factor") +
       ylab("Mean Prevalence (%)") + ggtitle("Risk Factor Comparison")
@@ -211,7 +214,7 @@ server <- function(input, output) {
   
   # Output for Age Bar Plot
   output$agePlot <- renderPlotly({
-    p3 <- ggplot(ageDF, aes(x = Age, y = mean_prevalence)) +
+    p3 <- ggplot(ageDF, aes(x = reorder(Age, +mean_prevalence), y = mean_prevalence)) +
       geom_bar(stat = "identity", fill = "#0077B6", color = "black", 
                alpha = 0.9) + xlab("Age Group") + 
       ylab("Mean Prevalence (%)") +
@@ -221,11 +224,11 @@ server <- function(input, output) {
   
   # Output for Location Bar Plot
   output$locationPlot <- renderPlotly({
-    p4 <- ggplot(locationDF, aes(x = LocationDesc, y = mean_prevalence)) +
+    p4 <- ggplot(locationDF, aes(x = reorder(LocationDesc, -mean_prevalence), y = mean_prevalence)) +
       geom_bar(stat = "identity", fill = "#0077B6", 
                color = "black", alpha = 0.9) + xlab("State") + 
       ylab("Mean Prevalence (%)") +
-      ggtitle("States With the Highest Mean Prevalence of Vision Disability")
+      ggtitle("States / Territories With the Highest Mean Prevalence of Vision Disability")
     ggplotly(p4)
   })
 
