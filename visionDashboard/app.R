@@ -8,6 +8,7 @@ library(dplyr)
 library(ggplot2)
 library(plotly)
 library(renv)
+library(lintr)
 
 ui <- dashboardPage(
   dashboardHeader(title = tags$u("Vision & Eye Health")),
@@ -30,7 +31,7 @@ ui <- dashboardPage(
         tags$div(id = "aboutText",
           h1(tags$u("About")),
           br(),
-          p(icon("database"), "Data Set: ",tags$a("Behavioral Risk Factors - Vision and Eye Health Surveillance (CDC)",href = "https://data.cdc.gov/Vision-Eye-Health/Behavioral-Risk-Factors-Vision-and-Eye-Health-Surv/vkwg-yswv/about_data")),
+          p(icon("database"), "Data Set: ", tags$a("Behavioral Risk Factors - Vision and Eye Health Surveillance (CDC)", href = "https://data.cdc.gov/Vision-Eye-Health/Behavioral-Risk-Factors-Vision-and-Eye-Health-Surv/vkwg-yswv/about_data")),
           p(icon("user"), "Dashboard Creator and Maintainer: Scott Schumacker") 
         )
       ),
@@ -38,74 +39,74 @@ ui <- dashboardPage(
       # Location drop down
       tabItem(tabName = "data",
               
-              # Row for main metric
-              fluidRow(
-                valueBoxOutput("avgValueOut", width = 6),
-                valueBoxOutput("avgValueOut2", width = 6)
-              ),
+        # Row for main metric
+        fluidRow(
+          valueBoxOutput("avgValueOut", width = 6),
+          valueBoxOutput("avgValueOut2", width = 6)
+        ),
               
-              # Row for time series plot and inputs
-              fluidRow(
-                box(
-                  title = "Plot Inputs", status = "primary", solidHeader = TRUE,
-                  collapsible = FALSE,
-                  column(6,
-                         selectInput(inputId = "location", "Select a location",
-                                     choices = unique(eyeHealth$LocationDesc),
-                                     selected = "National"),
-                         selectInput(inputId = "gender", "Select a gender",
-                                     choices = unique(eyeHealth$Gender),
-                                     selected = "All genders"),
-                         selectInput(inputId = "age", "Select an age group",
-                                     choices = unique(eyeHealth$Age),
-                                     selected = "All ages"),
-                         selectInput(inputId = "ethnicity", 
-                                     "Select an ethnicity",
-                                     choices = unique(eyeHealth$RaceEthnicity),
-                                     selected = "All races"),
-                         selectInput(inputId = "color", "Select a color",
-                                     choices = c("Black"),
-                                     selected = "All races")
-                  ),
+        # Row for time series plot and inputs
+        fluidRow(
+          box(
+            title = "Plot Inputs", status = "primary", solidHeader = TRUE,
+            collapsible = FALSE,
+            column(6,
+              selectInput(inputId = "location", "Select a location",
+                          choices = unique(eyeHealth$LocationDesc),
+                          selected = "National"),
+              selectInput(inputId = "gender", "Select a gender",
+                          choices = unique(eyeHealth$Gender),
+                          selected = "All genders"),
+              selectInput(inputId = "age", "Select an age group",
+                          choices = unique(eyeHealth$Age),
+                          selected = "All ages"),
+              selectInput(inputId = "ethnicity", 
+                          "Select an ethnicity",
+                          choices = unique(eyeHealth$RaceEthnicity),
+                          selected = "All races"),
+              selectInput(inputId = "color", "Select a color",
+                          choices = c("Black"),
+                          selected = "All races")
+            ),
                   
-                  column(6,
-                         selectInput(inputId = "location2", "Select a location",
-                                     choices = unique(eyeHealth$LocationDesc),
-                                     selected = "New Jersey"),
-                         selectInput(inputId = "gender2", "Select a gender",
-                                     choices = unique(eyeHealth$Gender),
-                                     selected = "All genders"),
-                         selectInput(inputId = "age2", "Select an age group",
-                                     choices = unique(eyeHealth$Age),
-                                     selected = "All ages"),
-                         selectInput(inputId = "ethnicity2", 
-                                     "Select an ethnicity",
-                                     choices = unique(eyeHealth$RaceEthnicity),
-                                     selected = "All races"),
-                         selectInput(inputId = "color2", "Select a color",
-                                     choices = c("Blue"),
-                                     selected = "All races"),
-                  )
-                ),
+            column(6,
+              selectInput(inputId = "location2", "Select a location",
+                          choices = unique(eyeHealth$LocationDesc),
+                          selected = "New Jersey"),
+              selectInput(inputId = "gender2", "Select a gender",
+                          choices = unique(eyeHealth$Gender),
+                          selected = "All genders"),
+              selectInput(inputId = "age2", "Select an age group",
+                          choices = unique(eyeHealth$Age),
+                          selected = "All ages"),
+              selectInput(inputId = "ethnicity2", 
+                          "Select an ethnicity",
+                          choices = unique(eyeHealth$RaceEthnicity),
+                          selected = "All races"),
+              selectInput(inputId = "color2", "Select a color",
+                          choices = c("Blue"),
+                          selected = "All races"),
+            )
+          ),
                 
-                # Time Series Plot
-                column(6,plotlyOutput("timePlot"))
-              ),
+          # Time Series Plot
+          column(6, plotlyOutput("timePlot"))
+        ),
               
-              # Row for risk bar plot and age bar plot
-              fluidRow(
-                column(6, plotlyOutput("riskPlot")),
-                column(6, plotlyOutput("agePlot"))
-              ),
+        # Row for risk bar plot and age bar plot
+        fluidRow(
+          column(6, plotlyOutput("riskPlot")),
+          column(6, plotlyOutput("agePlot"))
+        ),
               
-              # Row for Location Bar Plot
-              fluidRow(12, plotlyOutput("locationPlot"))
+        # Row for Location Bar Plot
+        fluidRow(12, plotlyOutput("locationPlot"))
       )
     ),
     br(),
     br(),
     div(id = "versionNumber",
-        "v1.0.0" 
+      "v1.0.0" 
     )
   )
 )
@@ -133,7 +134,7 @@ server <- function(input, output) {
     arrange(desc(mean_prevalence)) %>% 
     head(10)
   
-  state1 <- locationDF[1,1]
+  state1 <- locationDF[1, 1]
   
   # Output for Main Metric
   output$avgValueOut <- renderValueBox({
@@ -194,8 +195,9 @@ server <- function(input, output) {
   
   # Output for Risk Factor Bar Plot
   output$riskPlot <- renderPlotly({
-    p2 <- ggplot(riskFactorDF, aes(x = reorder(RiskFactor, +mean_prevalence), y = mean_prevalence)) +
-      geom_bar(stat = "identity", fill = "#0077B6",color = "black", 
+    p2 <- ggplot(riskFactorDF, aes(x = reorder(RiskFactor, +mean_prevalence), 
+                                   y = mean_prevalence)) +
+      geom_bar(stat = "identity", fill = "#0077B6", color = "black", 
                alpha = 0.9) + xlab("Risk Factor") +
       ylab("Mean Prevalence (%)") + ggtitle("Risk Factor Comparison")
     ggplotly(p2)
@@ -214,7 +216,8 @@ server <- function(input, output) {
   
   # Output for Age Bar Plot
   output$agePlot <- renderPlotly({
-    p3 <- ggplot(ageDF, aes(x = reorder(Age, +mean_prevalence), y = mean_prevalence)) +
+    p3 <- ggplot(ageDF, aes(x = reorder(Age, +mean_prevalence), 
+                            y = mean_prevalence)) +
       geom_bar(stat = "identity", fill = "#0077B6", color = "black", 
                alpha = 0.9) + xlab("Age Group") + 
       ylab("Mean Prevalence (%)") +
@@ -224,7 +227,8 @@ server <- function(input, output) {
   
   # Output for Location Bar Plot
   output$locationPlot <- renderPlotly({
-    p4 <- ggplot(locationDF, aes(x = reorder(LocationDesc, -mean_prevalence), y = mean_prevalence)) +
+    p4 <- ggplot(locationDF, aes(x = reorder(LocationDesc, -mean_prevalence), 
+                                 y = mean_prevalence)) +
       geom_bar(stat = "identity", fill = "#0077B6", 
                color = "black", alpha = 0.9) + xlab("State") + 
       ylab("Mean Prevalence (%)") +
