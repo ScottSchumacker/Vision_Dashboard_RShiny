@@ -9,9 +9,10 @@ library(ggplot2)
 library(plotly)
 library(renv)
 library(lintr)
+library(emoji)
 
 ui <- dashboardPage(
-  dashboardHeader(title = tags$u("Vision & Eye Health")),
+  dashboardHeader(title = "Vision & Eye Health"),
   dashboardSidebar(
     sidebarMenu(
       menuItem("Data Explore", tabName = "data"),
@@ -32,7 +33,8 @@ ui <- dashboardPage(
           h1(tags$u("About")),
           br(),
           p(icon("database"), "Data Set: ", tags$a("Behavioral Risk Factors - Vision and Eye Health Surveillance (CDC)", href = "https://data.cdc.gov/Vision-Eye-Health/Behavioral-Risk-Factors-Vision-and-Eye-Health-Surv/vkwg-yswv/about_data")),
-          p(icon("user"), "Dashboard Creator and Maintainer: Scott Schumacker") 
+          p(icon("user"), "Dashboard Creator and Maintainer: Scott Schumacker"),
+          p(emoji("smile"))
         )
       ),
       
@@ -112,6 +114,18 @@ ui <- dashboardPage(
 )
 
 server <- function(input, output) {
+  
+  # Load data
+  
+  # Show Modal
+  showModal(modalDialog(
+    title = "Welcome!",
+    paste0("Welcome to the Vision & Eye Health Dashboard v1.0.0 - Scott ", 
+           emoji("smile")),
+    easyClose = TRUE,
+    footer = NULL
+  ))
+  
   
   # Creating Main Metric DF to Calculate Overall Mean Prevalence
   avgDF <- eyeHealth %>% 
@@ -196,11 +210,13 @@ server <- function(input, output) {
   # Output for Risk Factor Bar Plot
   output$riskPlot <- renderPlotly({
     p2 <- ggplot(riskFactorDF, aes(x = reorder(RiskFactor, +mean_prevalence), 
-                                   y = mean_prevalence)) +
+                                   y = mean_prevalence, 
+                                   label = RiskFactor, 
+                                   label2 = mean_prevalence)) +
       geom_bar(stat = "identity", fill = "#0077B6", color = "black", 
                alpha = 0.9) + xlab("Risk Factor") +
       ylab("Mean Prevalence (%)") + ggtitle("Risk Factor Comparison")
-    ggplotly(p2)
+    ggplotly(p2, tooltip = c("label", "label2"))
   })
   
   # Creating Age Data Frame
@@ -217,23 +233,25 @@ server <- function(input, output) {
   # Output for Age Bar Plot
   output$agePlot <- renderPlotly({
     p3 <- ggplot(ageDF, aes(x = reorder(Age, +mean_prevalence), 
-                            y = mean_prevalence)) +
+                            y = mean_prevalence, 
+                            label = Age, label2 = mean_prevalence)) +
       geom_bar(stat = "identity", fill = "#0077B6", color = "black", 
                alpha = 0.9) + xlab("Age Group") + 
       ylab("Mean Prevalence (%)") +
       ggtitle("Age Group Comparison")
-    ggplotly(p3)
+    ggplotly(p3, tooltip = c("label", "label2"))
   })
   
   # Output for Location Bar Plot
   output$locationPlot <- renderPlotly({
     p4 <- ggplot(locationDF, aes(x = reorder(LocationDesc, -mean_prevalence), 
-                                 y = mean_prevalence)) +
+                                 y = mean_prevalence, 
+                                 label = LocationDesc, label2 = mean_prevalence)) +
       geom_bar(stat = "identity", fill = "#0077B6", 
                color = "black", alpha = 0.9) + xlab("State") + 
       ylab("Mean Prevalence (%)") +
       ggtitle("States / Territories With the Highest Mean Prevalence of Vision Disability")
-    ggplotly(p4)
+    ggplotly(p4, tooltip = c("label", "label2"))
   })
 
 }

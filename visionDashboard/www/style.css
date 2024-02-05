@@ -33,13 +33,17 @@
 }
 
 .skin-blue .sidebar-menu>li.active>a{
-  background-color: #0077B6;
-  color: white;
+  background-color: #d3d3d3;
+  border-radius: 15px;
+  border: none;
+  color: black;
 }
 
 .skin-blue .sidebar-menu>li:hover>a{
-  background-color: #0077B6;
-  color: white;
+  background-color: #d3d3d3;
+  border-radius: 15px;
+  border: none;
+  color: black;
 }
 .skin-blue .sidebar a {
   color: white;
