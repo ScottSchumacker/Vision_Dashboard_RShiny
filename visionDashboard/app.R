@@ -12,7 +12,7 @@ library(lintr)
 library(emoji)
 
 ui <- dashboardPage(
-  dashboardHeader(title = tags$u("Vision & Eye Health")),
+  dashboardHeader(title = "Vision & Eye Health"),
   dashboardSidebar(
     sidebarMenu(
       menuItem("Data Explore", tabName = "data"),
@@ -120,7 +120,8 @@ server <- function(input, output) {
   # Show Modal
   showModal(modalDialog(
     title = "Welcome!",
-    paste0("Welcome to the Vision & Eye Health Dashboard v1.0.0 - Scott ", emoji("smile")),
+    paste0("Welcome to the Vision & Eye Health Dashboard v1.0.0 - Scott ", 
+           emoji("smile")),
     easyClose = TRUE,
     footer = NULL
   ))
@@ -209,7 +210,9 @@ server <- function(input, output) {
   # Output for Risk Factor Bar Plot
   output$riskPlot <- renderPlotly({
     p2 <- ggplot(riskFactorDF, aes(x = reorder(RiskFactor, +mean_prevalence), 
-                                   y = mean_prevalence, label = RiskFactor, label2 = mean_prevalence)) +
+                                   y = mean_prevalence, 
+                                   label = RiskFactor, 
+                                   label2 = mean_prevalence)) +
       geom_bar(stat = "identity", fill = "#0077B6", color = "black", 
                alpha = 0.9) + xlab("Risk Factor") +
       ylab("Mean Prevalence (%)") + ggtitle("Risk Factor Comparison")
@@ -230,7 +233,8 @@ server <- function(input, output) {
   # Output for Age Bar Plot
   output$agePlot <- renderPlotly({
     p3 <- ggplot(ageDF, aes(x = reorder(Age, +mean_prevalence), 
-                            y = mean_prevalence, label = Age, label2 = mean_prevalence)) +
+                            y = mean_prevalence, 
+                            label = Age, label2 = mean_prevalence)) +
       geom_bar(stat = "identity", fill = "#0077B6", color = "black", 
                alpha = 0.9) + xlab("Age Group") + 
       ylab("Mean Prevalence (%)") +
@@ -241,7 +245,8 @@ server <- function(input, output) {
   # Output for Location Bar Plot
   output$locationPlot <- renderPlotly({
     p4 <- ggplot(locationDF, aes(x = reorder(LocationDesc, -mean_prevalence), 
-                                 y = mean_prevalence, label = LocationDesc, label2 = mean_prevalence)) +
+                                 y = mean_prevalence, 
+                                 label = LocationDesc, label2 = mean_prevalence)) +
       geom_bar(stat = "identity", fill = "#0077B6", 
                color = "black", alpha = 0.9) + xlab("State") + 
       ylab("Mean Prevalence (%)") +
