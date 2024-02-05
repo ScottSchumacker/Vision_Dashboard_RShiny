@@ -9,6 +9,7 @@ library(ggplot2)
 library(plotly)
 library(renv)
 library(lintr)
+library(emoji)
 
 ui <- dashboardPage(
   dashboardHeader(title = tags$u("Vision & Eye Health")),
@@ -32,7 +33,8 @@ ui <- dashboardPage(
           h1(tags$u("About")),
           br(),
           p(icon("database"), "Data Set: ", tags$a("Behavioral Risk Factors - Vision and Eye Health Surveillance (CDC)", href = "https://data.cdc.gov/Vision-Eye-Health/Behavioral-Risk-Factors-Vision-and-Eye-Health-Surv/vkwg-yswv/about_data")),
-          p(icon("user"), "Dashboard Creator and Maintainer: Scott Schumacker") 
+          p(icon("user"), "Dashboard Creator and Maintainer: Scott Schumacker"),
+          p(emoji("smile"))
         )
       ),
       
@@ -112,6 +114,17 @@ ui <- dashboardPage(
 )
 
 server <- function(input, output) {
+  
+  # Load data
+  
+  # Show Modal
+  showModal(modalDialog(
+    title = "Welcome!",
+    paste0("Welcome to the Vision & Eye Health Dashboard v1.0.0 - Scott ", emoji("smile")),
+    easyClose = TRUE,
+    footer = NULL
+  ))
+  
   
   # Creating Main Metric DF to Calculate Overall Mean Prevalence
   avgDF <- eyeHealth %>% 
